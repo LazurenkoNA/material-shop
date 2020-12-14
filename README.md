@@ -1,7 +1,7 @@
 # Getting Started with Create React App
 # Test Auth:
-#email: test@gmail.com    
-#password: 123456
+# email: test@gmail.com    
+# password: 123456
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
