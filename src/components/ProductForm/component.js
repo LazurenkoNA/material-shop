@@ -1,13 +1,24 @@
 import React from 'react';
 import { Box, Button, Snackbar, TextField, Typography } from '@material-ui/core';
 import { useSelector } from 'react-redux';
+import { Link } from 'react-router-dom';
 import useProductForm from './hook';
 import Alert from '../Alert';
 
 const ProductForm = () => {
-  const { name, nameError, description, descriptionError, price, priceError, image } = useSelector(
-    (state) => state.product
-  );
+  const {
+    key,
+    name,
+    nameError,
+    description,
+    descriptionError,
+    price,
+    priceError,
+    image,
+    discountedPrice,
+    discountedPriceError,
+    discountedDate,
+  } = useSelector((state) => state.product);
   const {
     openAlert,
     handleAlertClose,
@@ -16,18 +27,23 @@ const ProductForm = () => {
     handlerSetProductName,
     handlerSetProductDescription,
     handlerSetProductPrice,
+    handlerSetDiscountPrice,
     handleSetImage,
   } = useProductForm();
   const classes = useStyles();
 
   return (
-    <div>
+    <div className={classes.root}>
+      <Typography variant="h2" component="h1" className={classes.title}>
+        {key ? 'Edit Product' : 'Add Product'}
+      </Typography>
       <Box>
         <TextField
           required
           value={name}
           autoFocus
           multiline
+          className={classes.inputItem}
           onChange={handlerSetProductName}
           label="Name"
           error={!!nameError}
@@ -35,8 +51,8 @@ const ProductForm = () => {
           variant="outlined"
         />
         <TextField
+          className={classes.inputItem}
           value={description}
-          autoFocus
           multiline
           onChange={handlerSetProductDescription}
           label="Description"
@@ -49,31 +65,61 @@ const ProductForm = () => {
         <TextField
           required
           value={price}
-          autoFocus
+          className={classes.inputItem}
           onInput={handlerSetProductPrice}
-          label="Price"
+          label="Price, $"
           error={!!priceError}
           helperText={priceError}
           variant="outlined"
         />
       </Box>
-      <Box>
-        <label htmlFor="button-file" onChange={handleSetImage}>
+      <Box className={classes.file}>
+        <label htmlFor="button-file" className={classes.fileButton} onChange={handleSetImage}>
           <input accept="image/*" className={classes.input} id="button-file" multiple type="file" />
           <Button variant="contained" color="primary" component="span">
             Upload
           </Button>
         </label>
         <Typography component="h6" variant="h6">
-          {image ? image.name : 'Load File'}
+          {image ? image.name || image : 'Load File'}
         </Typography>
       </Box>
       <Box>
-        <Button type="button" color="primary" variant="outlined" onClick={handleSendData}>
-          Add
-        </Button>
+        <TextField
+          className={classes.inputItem}
+          label="Sale, %"
+          value={discountedPrice}
+          onChange={handlerSetDiscountPrice}
+          error={!!discountedPriceError}
+          helperText={discountedPriceError}
+          variant="outlined"
+        />
+        <TextField
+          id="date"
+          label="Discount time to:"
+          type="date"
+          variant="outlined"
+          defaultValue={discountedDate}
+          className={classes.inputItem}
+          InputLabelProps={{
+            shrink: true,
+          }}
+        />
       </Box>
 
+      <Box className={classes.submitButton}>
+        <Link to="/">
+          <Button
+            type="button"
+            color="primary"
+            size="large"
+            variant="outlined"
+            onClick={handleSendData}
+          >
+            {key ? 'Update Data' : 'Add'}
+          </Button>
+        </Link>
+      </Box>
       <Snackbar open={openAlert} autoHideDuration={6000} onClose={handleAlertClose}>
         <Alert onClose={handleAlertClose} severity="success">
           This is a success message!

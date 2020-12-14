@@ -1,9 +1,12 @@
 import {
   SET_PRODUCT_DESCRIPTION,
   SET_PRODUCT_DESCRIPTION_ERROR,
+  SET_PRODUCT_DISCOUNT_DATE,
   SET_PRODUCT_DISCOUNT_PRICE,
+  SET_PRODUCT_DISCOUNT_PRICE_ERROR,
   SET_PRODUCT_IMAGE,
   SET_PRODUCT_IMAGE_ERROR,
+  SET_PRODUCT_KEY,
   SET_PRODUCT_NAME,
   SET_PRODUCT_NAME_ERROR,
   SET_PRODUCT_PRICE,
@@ -11,6 +14,7 @@ import {
 } from '../constants/types';
 
 const initState = {
+  key: '',
   name: '',
   nameError: '',
   description: '',
@@ -20,10 +24,17 @@ const initState = {
   price: '',
   priceError: '',
   discountedPrice: '',
+  discountedPriceError: '',
+  discountedDate: '',
 };
 
 const productReducer = (state = initState, action) => {
   switch (action.type) {
+    case SET_PRODUCT_KEY:
+      return {
+        ...state,
+        key: action.payload.key,
+      };
     case SET_PRODUCT_NAME:
       return {
         ...state,
@@ -68,6 +79,16 @@ const productReducer = (state = initState, action) => {
       return {
         ...state,
         discountedPrice: action.payload.discountedPrice,
+      };
+    case SET_PRODUCT_DISCOUNT_PRICE_ERROR:
+      return {
+        ...state,
+        discountedPriceError: action.payload.discountedPriceError,
+      };
+    case SET_PRODUCT_DISCOUNT_DATE:
+      return {
+        ...state,
+        discountedDate: action.payload.discountedDate,
       };
     default:
       return state;
