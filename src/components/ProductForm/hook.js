@@ -9,11 +9,13 @@ import {
   setProductDiscountPrice,
   setProductDiscountPriceError,
   setProductImage,
+  setProductKey,
   setProductName,
   setProductNameError,
   setProductPrice,
   setProductPriceError,
 } from '../../store/actions/productActions';
+import setProducts from '../../store/actions/productsActions';
 
 const useProductForm = () => {
   const dispatch = useDispatch();
@@ -31,6 +33,7 @@ const useProductForm = () => {
     discountedPriceError,
     discountedDate,
   } = useSelector((state) => state.product);
+  const { products } = useSelector((state) => state);
   const nonDigit = new RegExp(`\\D+`, 'gm');
 
   const useStyles = makeStyles((theme) => ({
@@ -73,29 +76,25 @@ const useProductForm = () => {
   };
 
   const sendData = (key, value) => {
-    fire.database().ref(key).push(value);
+    fire.database().ref(key).push(`${value}`);
   };
 
   const sendDataImage = (key, value) => {
     fire.storage().ref(`${key}/${image.name}`).put(value);
   };
 
-  const getData = (key) => {
-    fire
-      .database()
-      .ref(key)
-      .on('value', (element) => {
-        const {
-          name: nameProduct,
-          description: descriptionProduct,
-          image: imageProduct,
-          price: priceProduct,
-        } = element.val()[productKey];
-        dispatch(setProductName(nameProduct));
-        dispatch(setProductDescription(descriptionProduct));
-        dispatch(setProductPrice(priceProduct));
-        dispatch(setProductImage(imageProduct));
-      });
+  const getData = () => {
+    const {
+      name: nameProduct,
+      description: descriptionProduct,
+      image: imageProduct,
+      price: priceProduct,
+    } = products[productKey];
+
+    dispatch(setProductName(nameProduct));
+    dispatch(setProductDescription(descriptionProduct));
+    dispatch(setProductPrice(priceProduct));
+    dispatch(setProductImage(imageProduct));
   };
 
   const handlerSetProductName = (e) => {
@@ -148,37 +147,65 @@ const useProductForm = () => {
     dispatch(setProductImage(files[0]));
   };
 
+  const deleteData = (key, value) => {
+    fire.database().ref(key).child(value).remove();
+  };
+
+  const getProductsData = (key) =>
+    fire
+      .database()
+      .ref(key)
+      .on('value', (element) => {
+        dispatch(setProducts(element.val()));
+      });
+
   const handleSendData = () => {
     if (!name || nameError || !price || priceError || descriptionError || imageError) {
       return;
     }
-    const productData = {
-      name,
-      description,
-      price,
-      image: image.name,
-      discountedPrice,
-      discountedDate,
-    };
+    const imageName = image.name;
+    let productData;
 
-    const deleteData = (key, value) => {
-      fire.database().ref(key).child(value).remove();
-    };
+    if (productKey && !imageName) {
+      productData = {
+        name,
+        description,
+        price,
+        image,
+        discountedPrice,
+        discountedDate,
+      };
+    } else {
+      productData = {
+        name,
+        description,
+        price,
+        image: imageName,
+        discountedPrice,
+        discountedDate,
+      };
+    }
 
     if (productKey) {
       deleteData('products', productKey);
       sendData('products', productData);
-      sendDataImage('products', image);
+      if (imageName) {
+        sendDataImage('products', `${image}`);
+      }
     } else {
       sendData('products', productData);
-      sendDataImage('products', image);
+      sendDataImage('products', `${image}`);
     }
 
+    getProductsData('products');
+
+    dispatch(setProductKey(''));
     dispatch(setProductName(''));
     dispatch(setProductDescription(''));
     dispatch(setProductPrice(''));
     dispatch(setProductImage(null));
     dispatch(setProductDiscountData(''));
+    dispatch(setProductDiscountPrice(''));
     setOpenAlert(true);
   };
 

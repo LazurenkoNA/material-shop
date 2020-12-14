@@ -8,10 +8,11 @@ import CardMedia from '@material-ui/core/CardMedia';
 import Typography from '@material-ui/core/Typography';
 import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
-import { Button } from '@material-ui/core';
+import { Box, Button } from '@material-ui/core';
 import { Link } from 'react-router-dom';
 import fire from '../../../utils/firebase';
 import { setProductKey } from '../../../store/actions/productActions';
+import setProducts from '../../../store/actions/productsActions';
 
 const useStyles = makeStyles({
   root: {
@@ -20,6 +21,10 @@ const useStyles = makeStyles({
   },
   media: {
     height: 140,
+  },
+  cardButtons: {
+    display: 'flex',
+    justifyContent: 'space-between',
   },
 });
 // eslint-disable-next-line react/prop-types
@@ -34,6 +39,21 @@ const CardItem = ({ id }) => {
     const storage = fire.storage();
     const pathReference = await storage.ref().child(`products/${imageName}`).getDownloadURL();
     setImage(pathReference);
+  };
+  const getProductsData = (key) =>
+    fire
+      .database()
+      .ref(key)
+      .on('value', (element) => {
+        dispatch(setProducts(element.val()));
+      });
+  const deleteData = (key, value) => {
+    fire.database().ref(key).child(value).remove();
+  };
+
+  const handleDeleteCard = () => {
+    deleteData('products', id);
+    getProductsData('products');
   };
 
   useEffect(() => {
@@ -63,11 +83,16 @@ const CardItem = ({ id }) => {
             </CardContent>
           </CardActionArea>
           <CardActions>
-            <Link to="/edit-product">
-              <Button size="small" color="primary" onClick={handleKey}>
-                Edit
+            <Box className={classes.cardButtons}>
+              <Link to="/edit-product">
+                <Button size="small" color="primary" onClick={handleKey}>
+                  Edit
+                </Button>
+              </Link>
+              <Button size="small" color="primary" onClick={handleDeleteCard}>
+                Delete
               </Button>
-            </Link>
+            </Box>
           </CardActions>
         </Card>
       )}

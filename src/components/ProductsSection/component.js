@@ -9,8 +9,6 @@ const ProductsSection = () => {
 
   const { products } = useSelector((state) => state);
 
-  console.log(products);
-
   return (
     <div style={{ paddingLeft: 15, paddingRight: 15 }}>
       {products && (

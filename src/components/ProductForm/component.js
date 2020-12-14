@@ -1,6 +1,7 @@
 import React from 'react';
 import { Box, Button, Snackbar, TextField, Typography } from '@material-ui/core';
 import { useSelector } from 'react-redux';
+import { Link } from 'react-router-dom';
 import useProductForm from './hook';
 import Alert from '../Alert';
 
@@ -34,7 +35,7 @@ const ProductForm = () => {
   return (
     <div className={classes.root}>
       <Typography variant="h2" component="h1" className={classes.title}>
-        Add Product
+        {key ? 'Edit Product' : 'Add Product'}
       </Typography>
       <Box>
         <TextField
@@ -107,15 +108,17 @@ const ProductForm = () => {
       </Box>
 
       <Box className={classes.submitButton}>
-        <Button
-          type="button"
-          color="primary"
-          size="large"
-          variant="outlined"
-          onClick={handleSendData}
-        >
-          {key ? 'Update Data' : 'Add'}
-        </Button>
+        <Link to="/">
+          <Button
+            type="button"
+            color="primary"
+            size="large"
+            variant="outlined"
+            onClick={handleSendData}
+          >
+            {key ? 'Update Data' : 'Add'}
+          </Button>
+        </Link>
       </Box>
       <Snackbar open={openAlert} autoHideDuration={6000} onClose={handleAlertClose}>
         <Alert onClose={handleAlertClose} severity="success">
