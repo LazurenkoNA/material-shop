@@ -21,6 +21,7 @@ export const setProductKey = (key) => async (dispatch) => {
     },
   });
 };
+
 export const setProductName = (name) => async (dispatch) => {
   dispatch({
     type: SET_PRODUCT_NAME,
@@ -83,6 +84,7 @@ export const setProductPrice = (price) => async (dispatch) => {
     },
   });
 };
+
 export const setProductPriceError = (priceError) => async (dispatch) => {
   dispatch({
     type: SET_PRODUCT_PRICE_ERROR,

@@ -86,9 +86,10 @@ const productReducer = (state = initState, action) => {
         discountedPriceError: action.payload.discountedPriceError,
       };
     case SET_PRODUCT_DISCOUNT_DATE:
+      console.log(action);
       return {
         ...state,
-        discountedDate: action.payload.discountedDate,
+        discountedData: action.payload.discountedData,
       };
     default:
       return state;

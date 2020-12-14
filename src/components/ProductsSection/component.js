@@ -1,13 +1,10 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
 import { Grid } from '@material-ui/core';
 import useProductsSection from './hook';
 import Card from './Card';
 
 const ProductsSection = () => {
-  const { classes } = useProductsSection();
-
-  const { products } = useSelector((state) => state);
+  const { classes, products } = useProductsSection();
 
   return (
     <div style={{ paddingLeft: 15, paddingRight: 15 }}>

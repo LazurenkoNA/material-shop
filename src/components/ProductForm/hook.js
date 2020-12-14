@@ -16,6 +16,9 @@ import {
   setProductPriceError,
 } from '../../store/actions/productActions';
 import setProducts from '../../store/actions/productsActions';
+import sendData from '../../utils/sendData';
+import sendDataImage from '../../utils/sendDataImage';
+import deleteData from '../../utils/deleteData';
 
 const useProductForm = () => {
   const dispatch = useDispatch();
@@ -75,26 +78,22 @@ const useProductForm = () => {
     setOpenAlert(false);
   };
 
-  const sendData = (key, value) => {
-    fire.database().ref(key).push(`${value}`);
-  };
-
-  const sendDataImage = (key, value) => {
-    fire.storage().ref(`${key}/${image.name}`).put(value);
-  };
-
   const getData = () => {
     const {
       name: nameProduct,
       description: descriptionProduct,
       image: imageProduct,
       price: priceProduct,
+      discountedDate: discountedDateProduct,
+      discountedPrice: discountedPriceProduct,
     } = products[productKey];
 
     dispatch(setProductName(nameProduct));
     dispatch(setProductDescription(descriptionProduct));
     dispatch(setProductPrice(priceProduct));
     dispatch(setProductImage(imageProduct));
+    dispatch(setProductDiscountData(discountedDateProduct));
+    dispatch(setProductDiscountPrice(discountedPriceProduct));
   };
 
   const handlerSetProductName = (e) => {
@@ -147,10 +146,6 @@ const useProductForm = () => {
     dispatch(setProductImage(files[0]));
   };
 
-  const deleteData = (key, value) => {
-    fire.database().ref(key).child(value).remove();
-  };
-
   const getProductsData = (key) =>
     fire
       .database()
@@ -164,10 +159,33 @@ const useProductForm = () => {
       return;
     }
     const imageName = image.name;
-    let productData;
 
-    if (productKey && !imageName) {
-      productData = {
+    // ~ If edit product
+    if (productKey) {
+      // ~ If update image
+      if (imageName) {
+        const productData = {
+          name,
+          description,
+          price,
+          image: image.name,
+          discountedPrice,
+          discountedDate,
+        };
+        // Delete in bd
+        deleteData('products', productKey);
+
+        // Delete in state
+        const newProducts = { ...products };
+        delete newProducts[productKey];
+        dispatch(setProducts(newProducts));
+
+        // Create new product
+        sendData('products', productData);
+        sendDataImage('products', image);
+      }
+      // ~ If did not update image
+      const productData = {
         name,
         description,
         price,
@@ -175,26 +193,20 @@ const useProductForm = () => {
         discountedPrice,
         discountedDate,
       };
+      deleteData('products', productKey);
+      sendData('products', productData);
     } else {
-      productData = {
+      // ~ Add product
+      const productData = {
         name,
         description,
         price,
-        image: imageName,
+        image: image.name,
         discountedPrice,
         discountedDate,
       };
-    }
-
-    if (productKey) {
-      deleteData('products', productKey);
       sendData('products', productData);
-      if (imageName) {
-        sendDataImage('products', `${image}`);
-      }
-    } else {
-      sendData('products', productData);
-      sendDataImage('products', `${image}`);
+      sendDataImage('products', image);
     }
 
     getProductsData('products');
@@ -212,6 +224,14 @@ const useProductForm = () => {
   useEffect(() => {
     if (productKey) {
       getData('products');
+    } else {
+      dispatch(setProductKey(''));
+      dispatch(setProductName(''));
+      dispatch(setProductDescription(''));
+      dispatch(setProductPrice(''));
+      dispatch(setProductImage(null));
+      dispatch(setProductDiscountData(''));
+      dispatch(setProductDiscountPrice(''));
     }
   }, []);
 

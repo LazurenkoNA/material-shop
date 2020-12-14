@@ -13,6 +13,7 @@ import { Link } from 'react-router-dom';
 import fire from '../../../utils/firebase';
 import { setProductKey } from '../../../store/actions/productActions';
 import setProducts from '../../../store/actions/productsActions';
+import deleteData from '../../../utils/deleteData';
 
 const useStyles = makeStyles({
   root: {
@@ -34,31 +35,44 @@ const CardItem = ({ id }) => {
   const [image, setImage] = useState('');
 
   const { name, description, image: imageName, price } = useSelector((state) => state.products[id]);
+  const { products } = useSelector((state) => state);
 
-  const getImage = async () => {
+  const getImage = async (imagePath) => {
     const storage = fire.storage();
-    const pathReference = await storage.ref().child(`products/${imageName}`).getDownloadURL();
+    const pathReference = await storage.ref().child(`products/${imagePath}`).getDownloadURL();
     setImage(pathReference);
+
+    return pathReference;
   };
-  const getProductsData = (key) =>
-    fire
-      .database()
-      .ref(key)
-      .on('value', (element) => {
-        dispatch(setProducts(element.val()));
-      });
-  const deleteData = (key, value) => {
-    fire.database().ref(key).child(value).remove();
-  };
+
+  // const getProductsData = (key) =>
+  //   fire
+  //     .database()
+  //     .ref(key)
+  //     .on('value', (element) => {
+  //       dispatch(setProducts(element.val()));
+  //       return element.val();
+  //     });
 
   const handleDeleteCard = () => {
+    // Delete in bd
     deleteData('products', id);
-    getProductsData('products');
+
+    // Delete in state
+    const newProducts = { ...products };
+
+    delete newProducts[id];
+    // eslint-disable-next-line no-debugger
+    debugger;
+    dispatch(setProducts({ ...newProducts }));
   };
 
+  // Get image
   useEffect(() => {
-    getImage();
-  }, []);
+    if (imageName) {
+      getImage(imageName).then();
+    }
+  }, [products]);
 
   const handleKey = () => {
     dispatch(setProductKey(id));
