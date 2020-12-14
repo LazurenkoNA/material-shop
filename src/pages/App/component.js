@@ -17,7 +17,9 @@ const App = () => {
         <Router>
           <CssBaseline />
           <Switch>
-            <Route path="/">{user ? <Products /> : <Login />}</Route>
+            <Route path="/" exact>
+              {user ? <Products /> : <Login />}
+            </Route>
             <Route path="/edit-product">
               <EditProduct />
             </Route>

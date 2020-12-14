@@ -5,6 +5,9 @@ import fire from '../../utils/firebase';
 import {
   setProductDescription,
   setProductDescriptionError,
+  setProductDiscountData,
+  setProductDiscountPrice,
+  setProductDiscountPriceError,
   setProductImage,
   setProductName,
   setProductNameError,
@@ -15,6 +18,7 @@ import {
 const useProductForm = () => {
   const dispatch = useDispatch();
   const {
+    key: productKey,
     name,
     nameError,
     description,
@@ -23,13 +27,42 @@ const useProductForm = () => {
     priceError,
     image,
     imageError,
+    discountedPrice,
+    discountedPriceError,
+    discountedDate,
   } = useSelector((state) => state.product);
   const nonDigit = new RegExp(`\\D+`, 'gm');
 
-  // eslint-disable-next-line no-unused-vars
   const useStyles = makeStyles((theme) => ({
+    root: {
+      height: '100vh',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      textAlign: 'center',
+    },
+    title: {
+      marginBottom: theme.spacing(2),
+    },
     input: {
       display: 'none',
+    },
+    inputItem: {
+      margin: theme.spacing(1),
+    },
+    file: {
+      display: 'flex',
+      margin: theme.spacing(1),
+    },
+    fileButton: {
+      marginRight: theme.spacing(1),
+    },
+    submitButton: {
+      marginTop: theme.spacing(2),
+    },
+    inputDate: {
+      width: 200,
     },
   }));
 
@@ -52,7 +85,16 @@ const useProductForm = () => {
       .database()
       .ref(key)
       .on('value', (element) => {
-        console.log(element.val());
+        const {
+          name: nameProduct,
+          description: descriptionProduct,
+          image: imageProduct,
+          price: priceProduct,
+        } = element.val()[productKey];
+        dispatch(setProductName(nameProduct));
+        dispatch(setProductDescription(descriptionProduct));
+        dispatch(setProductPrice(priceProduct));
+        dispatch(setProductImage(imageProduct));
       });
   };
 
@@ -86,13 +128,23 @@ const useProductForm = () => {
     }
   };
 
+  const handlerSetDiscountPrice = (e) => {
+    const { value } = e.target;
+    dispatch(setProductDiscountPrice(value));
+    if (nonDigit.test(value)) {
+      dispatch(setProductDiscountPriceError('Only number'));
+    } else if (+value > 100) {
+      dispatch(setProductDiscountPriceError('More 100% ?'));
+    } else if (discountedPriceError) {
+      dispatch(setProductDiscountPriceError(''));
+    }
+  };
+
   const handleSetImage = (e) => {
     const { files } = e.target;
-
     if (!files[0]) {
       return;
     }
-
     dispatch(setProductImage(files[0]));
   };
 
@@ -105,20 +157,36 @@ const useProductForm = () => {
       description,
       price,
       image: image.name,
+      discountedPrice,
+      discountedDate,
     };
-    sendData('products', productData);
-    sendDataImage('products', image);
+
+    const deleteData = (key, value) => {
+      fire.database().ref(key).child(value).remove();
+    };
+
+    if (productKey) {
+      deleteData('products', productKey);
+      sendData('products', productData);
+      sendDataImage('products', image);
+    } else {
+      sendData('products', productData);
+      sendDataImage('products', image);
+    }
 
     dispatch(setProductName(''));
     dispatch(setProductDescription(''));
     dispatch(setProductPrice(''));
     dispatch(setProductImage(null));
+    dispatch(setProductDiscountData(''));
     setOpenAlert(true);
   };
 
   useEffect(() => {
-    getData('products');
-  });
+    if (productKey) {
+      getData('products');
+    }
+  }, []);
 
   return {
     openAlert,
@@ -130,6 +198,7 @@ const useProductForm = () => {
     handlerSetProductName,
     handlerSetProductDescription,
     handlerSetProductPrice,
+    handlerSetDiscountPrice,
     handleSetImage,
   };
 };

@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
+import { makeStyles } from '@material-ui/core';
 import fire from '../../utils/firebase';
 import setProducts from '../../store/actions/productsActions';
 
@@ -16,13 +17,17 @@ const useProductsSection = () => {
     return data;
   };
 
+  const classes = makeStyles((theme) => ({
+    root: {
+      marginTop: theme.spacing(2),
+    },
+  }))();
+
   useEffect(() => {
     getData('products');
   }, []);
 
-  return {
-    getData,
-  };
+  return { classes, getData };
 };
 
 export default useProductsSection;
