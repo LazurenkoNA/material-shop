@@ -9,17 +9,14 @@ const useProductsSection = () => {
   const { products } = useSelector((state) => state);
 
   // Get products data from bd
-  const getData = (key) => {
-    const data = fire
+  const getData = (key) =>
+    fire
       .database()
       .ref(key)
       .on('value', (element) => {
         dispatch(setProducts(element.val()));
-        console.log(element.val());
         return element.val();
       });
-    return data;
-  };
 
   const classes = makeStyles((theme) => ({
     root: {

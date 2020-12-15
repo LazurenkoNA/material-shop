@@ -34,7 +34,14 @@ const CardItem = ({ id }) => {
   const dispatch = useDispatch();
   const [image, setImage] = useState('');
 
-  const { name, description, image: imageName, price } = useSelector((state) => state.products[id]);
+  const {
+    name,
+    description,
+    image: imageName,
+    price,
+    discountedPrice,
+    discountedDate,
+  } = useSelector((state) => state.products[id]);
   const { products } = useSelector((state) => state);
 
   const getImage = async (imagePath) => {
@@ -45,25 +52,13 @@ const CardItem = ({ id }) => {
     return pathReference;
   };
 
-  // const getProductsData = (key) =>
-  //   fire
-  //     .database()
-  //     .ref(key)
-  //     .on('value', (element) => {
-  //       dispatch(setProducts(element.val()));
-  //       return element.val();
-  //     });
-
   const handleDeleteCard = () => {
     // Delete in bd
     deleteData('products', id);
-
     // Delete in state
     const newProducts = { ...products };
 
     delete newProducts[id];
-    // eslint-disable-next-line no-debugger
-    debugger;
     dispatch(setProducts({ ...newProducts }));
   };
 
@@ -73,6 +68,42 @@ const CardItem = ({ id }) => {
       getImage(imageName).then();
     }
   }, [products]);
+
+  const setDiscountDate = () => {
+    if (discountedDate) {
+      const nowDate = Date.now();
+      const endSale = new Date(discountedDate);
+      let result;
+
+      const timeToEndSale = new Date(endSale - nowDate);
+
+      // ~ If date <= 0
+      if (timeToEndSale <= 0) {
+        result = 'Sale end 😔';
+        return result;
+      }
+
+      // Counting days
+      let seconds = Math.floor(timeToEndSale / 1000);
+      let minutes = Math.floor(seconds / 60);
+      let hours = Math.floor(minutes / 60);
+      const days = Math.floor(hours / 24);
+
+      // Counting rest data
+      hours %= 24;
+      seconds %= 60;
+      minutes %= 60;
+
+      const templateDays = days ? `${days}days` : '';
+
+      // result = `End sale across ${templateDays} ${hours}:${minutes}:${seconds}`;
+
+      result = `End sale across ${templateDays}`;
+
+      return result;
+    }
+    return '';
+  };
 
   const handleKey = () => {
     dispatch(setProductKey(id));
@@ -92,8 +123,17 @@ const CardItem = ({ id }) => {
                 {description}
               </Typography>
               <Typography variant="body2" color="textSecondary" component="p">
-                $ {price}
+                {discountedPrice
+                  ? `(sale ${discountedPrice}%) $${price} => to $${
+                      ((100 - +discountedPrice) / 100) * price
+                    }`
+                  : `$${price}`}
               </Typography>
+              {discountedDate && (
+                <Typography variant="body2" color="textSecondary" component="p">
+                  {setDiscountDate()}
+                </Typography>
+              )}
             </CardContent>
           </CardActionArea>
           <CardActions>

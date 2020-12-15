@@ -2,6 +2,7 @@ import {
   SET_PRODUCT_DESCRIPTION,
   SET_PRODUCT_DESCRIPTION_ERROR,
   SET_PRODUCT_DISCOUNT_DATE,
+  SET_PRODUCT_DISCOUNT_DATE_ERROR,
   SET_PRODUCT_DISCOUNT_PRICE,
   SET_PRODUCT_DISCOUNT_PRICE_ERROR,
   SET_PRODUCT_IMAGE,
@@ -112,11 +113,20 @@ export const setProductDiscountPriceError = (discountedPriceError) => async (dis
   });
 };
 
-export const setProductDiscountData = (discountedData) => async (dispatch) => {
+export const setProductDiscountDate = (discountedDate) => async (dispatch) => {
   dispatch({
     type: SET_PRODUCT_DISCOUNT_DATE,
     payload: {
-      discountedData,
+      discountedDate,
+    },
+  });
+};
+
+export const setProductDiscountDateError = (discountedDateError) => async (dispatch) => {
+  dispatch({
+    type: SET_PRODUCT_DISCOUNT_DATE_ERROR,
+    payload: {
+      discountedDateError,
     },
   });
 };

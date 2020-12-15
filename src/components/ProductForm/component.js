@@ -1,7 +1,6 @@
 import React from 'react';
 import { Box, Button, Snackbar, TextField, Typography } from '@material-ui/core';
 import { useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
 import useProductForm from './hook';
 import Alert from '../Alert';
 
@@ -18,6 +17,7 @@ const ProductForm = () => {
     discountedPrice,
     discountedPriceError,
     discountedDate,
+    discountedDateError,
   } = useSelector((state) => state.product);
   const {
     openAlert,
@@ -29,6 +29,7 @@ const ProductForm = () => {
     handlerSetProductPrice,
     handlerSetDiscountPrice,
     handleSetImage,
+    handleSetProductDate,
   } = useProductForm();
   const classes = useStyles();
 
@@ -99,7 +100,11 @@ const ProductForm = () => {
           label="Discount time to:"
           type="date"
           variant="outlined"
+          value={discountedDate}
+          onChange={handleSetProductDate}
           defaultValue={discountedDate}
+          error={!!discountedDateError}
+          helperText={discountedDateError}
           className={classes.inputItem}
           InputLabelProps={{
             shrink: true,
@@ -108,17 +113,17 @@ const ProductForm = () => {
       </Box>
 
       <Box className={classes.submitButton}>
-        <Link to="/">
-          <Button
-            type="button"
-            color="primary"
-            size="large"
-            variant="outlined"
-            onClick={handleSendData}
-          >
-            {key ? 'Update Data' : 'Add'}
-          </Button>
-        </Link>
+        {/* <Link to="/"> */}
+        <Button
+          type="button"
+          color="primary"
+          size="large"
+          variant="outlined"
+          onClick={handleSendData}
+        >
+          {key ? 'Update Data' : 'Add'}
+        </Button>
+        {/* </Link> */}
       </Box>
       <Snackbar open={openAlert} autoHideDuration={6000} onClose={handleAlertClose}>
         <Alert onClose={handleAlertClose} severity="success">
