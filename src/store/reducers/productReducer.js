@@ -2,6 +2,7 @@ import {
   SET_PRODUCT_DESCRIPTION,
   SET_PRODUCT_DESCRIPTION_ERROR,
   SET_PRODUCT_DISCOUNT_DATE,
+  SET_PRODUCT_DISCOUNT_DATE_ERROR,
   SET_PRODUCT_DISCOUNT_PRICE,
   SET_PRODUCT_DISCOUNT_PRICE_ERROR,
   SET_PRODUCT_IMAGE,
@@ -26,6 +27,7 @@ const initState = {
   discountedPrice: '',
   discountedPriceError: '',
   discountedDate: '',
+  discountedDateError: '',
 };
 
 const productReducer = (state = initState, action) => {
@@ -86,10 +88,14 @@ const productReducer = (state = initState, action) => {
         discountedPriceError: action.payload.discountedPriceError,
       };
     case SET_PRODUCT_DISCOUNT_DATE:
-      console.log(action);
       return {
         ...state,
-        discountedData: action.payload.discountedData,
+        discountedDate: action.payload.discountedDate,
+      };
+    case SET_PRODUCT_DISCOUNT_DATE_ERROR:
+      return {
+        ...state,
+        discountedDateError: action.payload.discountedDateError,
       };
     default:
       return state;

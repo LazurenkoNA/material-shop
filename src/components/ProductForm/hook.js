@@ -5,7 +5,8 @@ import fire from '../../utils/firebase';
 import {
   setProductDescription,
   setProductDescriptionError,
-  setProductDiscountData,
+  setProductDiscountDate,
+  setProductDiscountDateError,
   setProductDiscountPrice,
   setProductDiscountPriceError,
   setProductImage,
@@ -18,7 +19,7 @@ import {
 import setProducts from '../../store/actions/productsActions';
 import sendData from '../../utils/sendData';
 import sendDataImage from '../../utils/sendDataImage';
-import deleteData from '../../utils/deleteData';
+import updateProductData from '../../utils/updateProductData';
 
 const useProductForm = () => {
   const dispatch = useDispatch();
@@ -35,6 +36,7 @@ const useProductForm = () => {
     discountedPrice,
     discountedPriceError,
     discountedDate,
+    discountedDateError,
   } = useSelector((state) => state.product);
   const { products } = useSelector((state) => state);
   const nonDigit = new RegExp(`\\D+`, 'gm');
@@ -92,7 +94,7 @@ const useProductForm = () => {
     dispatch(setProductDescription(descriptionProduct));
     dispatch(setProductPrice(priceProduct));
     dispatch(setProductImage(imageProduct));
-    dispatch(setProductDiscountData(discountedDateProduct));
+    dispatch(setProductDiscountDate(discountedDateProduct));
     dispatch(setProductDiscountPrice(discountedPriceProduct));
   };
 
@@ -131,11 +133,17 @@ const useProductForm = () => {
     dispatch(setProductDiscountPrice(value));
     if (nonDigit.test(value)) {
       dispatch(setProductDiscountPriceError('Only number'));
-    } else if (+value > 100) {
-      dispatch(setProductDiscountPriceError('More 100% ?'));
+    } else if (+value > 90) {
+      dispatch(setProductDiscountPriceError('Not more 90%'));
     } else if (discountedPriceError) {
       dispatch(setProductDiscountPriceError(''));
     }
+  };
+
+  const handleSetProductDate = (e) => {
+    const { value } = e.target;
+    dispatch(setProductDiscountDate(value));
+    if (discountedDateError) dispatch(setProductDiscountDateError(''));
   };
 
   const handleSetImage = (e) => {
@@ -154,10 +162,59 @@ const useProductForm = () => {
         dispatch(setProducts(element.val()));
       });
 
+  const setAllDefaultValue = () => {
+    dispatch(setProductKey(''));
+    dispatch(setProductName(''));
+    dispatch(setProductDescription(''));
+    dispatch(setProductPrice(''));
+    dispatch(setProductImage(null));
+    dispatch(setProductDiscountDate(''));
+    dispatch(setProductDiscountPrice(''));
+  };
+
   const handleSendData = () => {
-    if (!name || nameError || !price || priceError || descriptionError || imageError) {
+    if (
+      !name ||
+      nameError ||
+      !price ||
+      priceError ||
+      descriptionError ||
+      imageError ||
+      discountedDateError ||
+      discountedPriceError
+    ) {
       return;
     }
+
+    // ~ If discount date empty
+    if (discountedPrice && !discountedDate) {
+      dispatch(
+        setProductDiscountDateError('Discount date not be empty when the discount price id filled')
+      );
+      return;
+    }
+
+    // If discount price empty
+    if (!discountedPrice && discountedDate) {
+      dispatch(
+        setProductDiscountPriceError('The discount price cannot be empty when the date is filled')
+      );
+      return;
+    }
+
+    if (+discountedPrice < 10) {
+      dispatch(setProductDiscountPriceError('Not less 10%'));
+      return;
+    }
+
+    // ~ Past discount time
+    if (discountedDate) {
+      if (new Date(discountedDate) - Date.now() <= 0) {
+        dispatch(setProductDiscountDateError('This past time'));
+        return;
+      }
+    }
+
     const imageName = image.name;
 
     // ~ If edit product
@@ -168,33 +225,24 @@ const useProductForm = () => {
           name,
           description,
           price,
-          image: image.name,
+          image: imageName,
           discountedPrice,
           discountedDate,
         };
-        // Delete in bd
-        deleteData('products', productKey);
-
-        // Delete in state
-        const newProducts = { ...products };
-        delete newProducts[productKey];
-        dispatch(setProducts(newProducts));
-
-        // Create new product
-        sendData('products', productData);
+        updateProductData(productKey, productData);
         sendDataImage('products', image);
+      } else {
+        // ~ If did not update image
+        const productData = {
+          name,
+          description,
+          price,
+          image,
+          discountedPrice,
+          discountedDate,
+        };
+        updateProductData(productKey, productData);
       }
-      // ~ If did not update image
-      const productData = {
-        name,
-        description,
-        price,
-        image,
-        discountedPrice,
-        discountedDate,
-      };
-      deleteData('products', productKey);
-      sendData('products', productData);
     } else {
       // ~ Add product
       const productData = {
@@ -211,13 +259,7 @@ const useProductForm = () => {
 
     getProductsData('products');
 
-    dispatch(setProductKey(''));
-    dispatch(setProductName(''));
-    dispatch(setProductDescription(''));
-    dispatch(setProductPrice(''));
-    dispatch(setProductImage(null));
-    dispatch(setProductDiscountData(''));
-    dispatch(setProductDiscountPrice(''));
+    setAllDefaultValue();
     setOpenAlert(true);
   };
 
@@ -225,13 +267,7 @@ const useProductForm = () => {
     if (productKey) {
       getData('products');
     } else {
-      dispatch(setProductKey(''));
-      dispatch(setProductName(''));
-      dispatch(setProductDescription(''));
-      dispatch(setProductPrice(''));
-      dispatch(setProductImage(null));
-      dispatch(setProductDiscountData(''));
-      dispatch(setProductDiscountPrice(''));
+      setAllDefaultValue();
     }
   }, []);
 
@@ -247,6 +283,7 @@ const useProductForm = () => {
     handlerSetProductPrice,
     handlerSetDiscountPrice,
     handleSetImage,
+    handleSetProductDate,
   };
 };
 
