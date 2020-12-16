@@ -14,6 +14,7 @@ import fire from '../../../utils/firebase';
 import { setProductKey } from '../../../store/actions/productActions';
 import setProducts from '../../../store/actions/productsActions';
 import deleteData from '../../../utils/deleteData';
+import useCardItem from './hook';
 
 const useStyles = makeStyles({
   root: {
@@ -27,13 +28,16 @@ const useStyles = makeStyles({
     display: 'flex',
     justifyContent: 'space-between',
   },
+  discountPrice: {
+    fontWeight: 'bold',
+  },
 });
 // eslint-disable-next-line react/prop-types
 const CardItem = ({ id }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const [image, setImage] = useState('');
-
+  const { setDiscountDate } = useCardItem();
   const {
     name,
     description,
@@ -69,41 +73,10 @@ const CardItem = ({ id }) => {
     }
   }, [products]);
 
-  const setDiscountDate = () => {
-    if (discountedDate) {
-      const nowDate = Date.now();
-      const endSale = new Date(discountedDate);
-      let result;
-
-      const timeToEndSale = new Date(endSale - nowDate);
-
-      // ~ If date <= 0
-      if (timeToEndSale <= 0) {
-        result = 'Sale end 😔';
-        return result;
-      }
-
-      // Counting days
-      let seconds = Math.floor(timeToEndSale / 1000);
-      let minutes = Math.floor(seconds / 60);
-      let hours = Math.floor(minutes / 60);
-      const days = Math.floor(hours / 24);
-
-      // Counting rest data
-      hours %= 24;
-      seconds %= 60;
-      minutes %= 60;
-
-      const templateDays = days ? `${days}days` : '';
-
-      // result = `End sale across ${templateDays} ${hours}:${minutes}:${seconds}`;
-
-      result = `End sale across ${templateDays}`;
-
-      return result;
-    }
-    return '';
-  };
+  const setDiscountPrice = () =>
+    `$${price} (sale ${discountedPrice}%) => to $${Math.floor(
+      ((100 - +discountedPrice) / 100) * price
+    )}`;
 
   const handleKey = () => {
     dispatch(setProductKey(id));
@@ -122,16 +95,17 @@ const CardItem = ({ id }) => {
               <Typography variant="body2" color="textSecondary" component="p">
                 {description}
               </Typography>
-              <Typography variant="body2" color="textSecondary" component="p">
-                {discountedPrice
-                  ? `(sale ${discountedPrice}%) $${price} => to $${
-                      ((100 - +discountedPrice) / 100) * price
-                    }`
-                  : `$${price}`}
+              <Typography
+                className={classes.discountPrice}
+                variant="body1"
+                color="textSecondary"
+                component="p"
+              >
+                {discountedPrice ? setDiscountPrice() : `$${price}`}
               </Typography>
               {discountedDate && (
                 <Typography variant="body2" color="textSecondary" component="p">
-                  {setDiscountDate()}
+                  {setDiscountDate(discountedDate)}
                 </Typography>
               )}
             </CardContent>

@@ -72,6 +72,11 @@ const useProductForm = () => {
     inputDate: {
       width: 200,
     },
+    fab: {
+      position: 'fixed',
+      top: theme.spacing(3),
+      left: theme.spacing(3),
+    },
   }));
 
   const [openAlert, setOpenAlert] = useState(false);
@@ -186,7 +191,7 @@ const useProductForm = () => {
       return;
     }
 
-    // ~ If discount date empty
+    // ~ Validation discount date empty
     if (discountedPrice && !discountedDate) {
       dispatch(
         setProductDiscountDateError('Discount date not be empty when the discount price id filled')
@@ -194,7 +199,7 @@ const useProductForm = () => {
       return;
     }
 
-    // If discount price empty
+    // ~ Validation discount price empty
     if (!discountedPrice && discountedDate) {
       dispatch(
         setProductDiscountPriceError('The discount price cannot be empty when the date is filled')
@@ -202,8 +207,15 @@ const useProductForm = () => {
       return;
     }
 
-    if (+discountedPrice < 10) {
+    // ~ Validation discount price < 10%
+    if (discountedPrice && +discountedPrice < 10) {
       dispatch(setProductDiscountPriceError('Not less 10%'));
+      return;
+    }
+
+    // ~ Validation length product name < 20
+    if (name.length < 20) {
+      dispatch(setProductNameError('Minimal length product name 20 symbols'));
       return;
     }
 
@@ -231,6 +243,7 @@ const useProductForm = () => {
         };
         updateProductData(productKey, productData);
         sendDataImage('products', image);
+        window.location.pathname = '/';
       } else {
         // ~ If did not update image
         const productData = {
@@ -242,6 +255,7 @@ const useProductForm = () => {
           discountedDate,
         };
         updateProductData(productKey, productData);
+        window.location.pathname = '/';
       }
     } else {
       // ~ Add product

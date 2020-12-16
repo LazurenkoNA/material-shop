@@ -1,6 +1,8 @@
 import React from 'react';
-import { Box, Button, Snackbar, TextField, Typography } from '@material-ui/core';
+import { Box, Button, Fab, Snackbar, TextField, Typography } from '@material-ui/core';
 import { useSelector } from 'react-redux';
+import { NavigateBefore } from '@material-ui/icons';
+import { Link } from 'react-router-dom';
 import useProductForm from './hook';
 import Alert from '../Alert';
 
@@ -35,6 +37,12 @@ const ProductForm = () => {
 
   return (
     <div className={classes.root}>
+      <Link to="/">
+        <Fab size="medium" className={classes.fab} color="primary">
+          <NavigateBefore fontSize="large" />
+        </Fab>
+      </Link>
+
       <Typography variant="h2" component="h1" className={classes.title}>
         {key ? 'Edit Product' : 'Add Product'}
       </Typography>
@@ -43,6 +51,7 @@ const ProductForm = () => {
           required
           value={name}
           autoFocus
+          fullWidth
           multiline
           className={classes.inputItem}
           onChange={handlerSetProductName}
@@ -55,6 +64,7 @@ const ProductForm = () => {
           className={classes.inputItem}
           value={description}
           multiline
+          fullWidth
           onChange={handlerSetProductDescription}
           label="Description"
           error={!!descriptionError}
@@ -82,7 +92,7 @@ const ProductForm = () => {
           </Button>
         </label>
         <Typography component="h6" variant="h6">
-          {image ? image.name || image : 'Load File'}
+          {image ? image.name || image : 'Load File *'}
         </Typography>
       </Box>
       <Box>
