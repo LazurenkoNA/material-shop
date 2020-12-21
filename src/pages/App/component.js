@@ -1,6 +1,6 @@
 import { CssBaseline, MuiThemeProvider } from '@material-ui/core';
 import { useSelector } from 'react-redux';
-import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Switch, Route, Redirect } from 'react-router-dom';
 import useApp from './hook';
 import Login from '../login';
 import Products from '../products';
@@ -16,17 +16,28 @@ const App = () => {
       <MuiThemeProvider theme={theme}>
         <Router>
           <CssBaseline />
-          <Switch>
-            <Route path="/" exact>
-              {user ? <Products /> : <Login />}
-            </Route>
-            <Route path="/edit-product">
-              <EditProduct />
-            </Route>
-            <Route path="/add-product">
-              <AddProduct />
-            </Route>
-          </Switch>
+
+          {user ? (
+            <Switch>
+              <Route path="/" exact>
+                <Products />
+              </Route>
+              <Route path="/edit-product">
+                <EditProduct />
+              </Route>
+              <Route path="/add-product">
+                <AddProduct />
+              </Route>
+              <Redirect from="/login" to="/" />
+            </Switch>
+          ) : (
+            <Switch>
+              <Route exact path="/login">
+                <Login />
+              </Route>
+              <Redirect to="/login" />
+            </Switch>
+          )}
         </Router>
       </MuiThemeProvider>
     </div>

@@ -87,7 +87,7 @@ const CardItem = ({ id }) => {
       {image && (
         <Card className={classes.root}>
           <CardActionArea>
-            <CardMedia className={classes.media} image={image} title="Contemplative Reptile" />
+            <CardMedia className={classes.media} image={image} title={name} />
             <CardContent>
               <Typography gutterBottom variant="h5" component="h2">
                 {name}
