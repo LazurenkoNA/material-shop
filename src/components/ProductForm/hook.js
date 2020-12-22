@@ -1,6 +1,8 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/core';
 import { useEffect, useState } from 'react';
+import * as yup from 'yup';
+import { useFormik } from 'formik';
 import fire from '../../utils/firebase';
 import {
   setProductDescription,
@@ -32,7 +34,7 @@ const useProductForm = () => {
     price,
     priceError,
     image,
-    imageError,
+    // imageError,
     discountedPrice,
     discountedPriceError,
     discountedDate,
@@ -178,54 +180,54 @@ const useProductForm = () => {
   };
 
   const handleSendData = () => {
-    if (
-      !name ||
-      nameError ||
-      !price ||
-      priceError ||
-      descriptionError ||
-      imageError ||
-      discountedDateError ||
-      discountedPriceError
-    ) {
-      return;
-    }
+    // if (
+    //   !name ||
+    //   nameError ||
+    //   !price ||
+    //   priceError ||
+    //   descriptionError ||
+    //   imageError ||
+    //   discountedDateError ||
+    //   discountedPriceError
+    // ) {
+    //   return;
+    // }
 
-    // ~ Validation discount date empty
-    if (discountedPrice && !discountedDate) {
-      dispatch(
-        setProductDiscountDateError('Discount date not be empty when the discount price id filled')
-      );
-      return;
-    }
+    // // ~ Validation discount date empty
+    // if (discountedPrice && !discountedDate) {
+    //   dispatch(
+    //     setProductDiscountDateError('Discount date not be empty when the discount price id filled')
+    //   );
+    //   return;
+    // }
 
-    // ~ Validation discount price empty
-    if (!discountedPrice && discountedDate) {
-      dispatch(
-        setProductDiscountPriceError('The discount price cannot be empty when the date is filled')
-      );
-      return;
-    }
+    // // ~ Validation discount price empty
+    // if (!discountedPrice && discountedDate) {
+    //   dispatch(
+    //     setProductDiscountPriceError('The discount price cannot be empty when the date is filled')
+    //   );
+    //   return;
+    // }
 
-    // ~ Validation discount price < 10%
-    if (discountedPrice && +discountedPrice < 10) {
-      dispatch(setProductDiscountPriceError('Not less 10%'));
-      return;
-    }
+    // // ~ Validation discount price < 10%
+    // if (discountedPrice && +discountedPrice < 10) {
+    //   dispatch(setProductDiscountPriceError('Not less 10%'));
+    //   return;
+    // }
+    //
+    // // ~ Validation length product name < 20
+    // if (name.length < 20) {
+    //   dispatch(setProductNameError('Minimal length product name 20 symbols'));
+    //   return;
+    // }
 
-    // ~ Validation length product name < 20
-    if (name.length < 20) {
-      dispatch(setProductNameError('Minimal length product name 20 symbols'));
-      return;
-    }
-
-    // ~ Past discount time
-    if (discountedDate) {
-      if (new Date(discountedDate) - Date.now() <= 0) {
-        dispatch(setProductDiscountDateError('This past time'));
-        return;
-      }
-    }
+    // // ~ Past discount time
+    // if (discountedDate) {
+    //   if (new Date(discountedDate) - Date.now() <= 0) {
+    //     dispatch(setProductDiscountDateError('This past time'));
+    //     return;
+    //   }
+    // }
 
     const imageName = image.name;
 
@@ -285,6 +287,41 @@ const useProductForm = () => {
     }
   }, []);
 
+  const validationSchema = yup.object({
+    name: yup
+      .string('Enter product name')
+      .min(20, 'Product name should be of minimum 20 characters length')
+      .max(60, 'Product name should be of maximum 60 characters length')
+      .required('Product name is required'),
+    description: yup
+      .string('Enter description')
+      .max(200, 'Description should be of maximum 200 characters length'),
+    price: yup
+      .number('Enter price')
+      .min(0, 'Price should be more 0')
+      .max(99999999.99, 'Price should be less 100 000 000')
+      .required('Price is required'),
+    priceDate: yup.date('Enter date').when('price', {
+      is: true, // alternatively: (isBig, isSpecial) => isBig && isSpecial
+      then: yup.date().required('Product name is required'),
+      otherwise: yup.date(),
+    }),
+  });
+  // new Date().toISOString().slice(0, 10);
+  const formik = useFormik({
+    initialValues: {
+      name: '',
+      description: '',
+      price: '',
+      discountedPrice: '',
+      discountedDate: '',
+    },
+    validationSchema,
+    onSubmit: (values) => {
+      alert(JSON.stringify(values, null, 2));
+    },
+  });
+
   return {
     openAlert,
     useStyles,
@@ -298,6 +335,7 @@ const useProductForm = () => {
     handlerSetDiscountPrice,
     handleSetImage,
     handleSetProductDate,
+    formik,
   };
 };
 
