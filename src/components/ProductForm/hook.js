@@ -3,6 +3,7 @@ import { makeStyles } from '@material-ui/core';
 import { useEffect, useState } from 'react';
 import * as yup from 'yup';
 import { useFormik } from 'formik';
+import { useHistory } from 'react-router-dom';
 import fire from '../../utils/firebase';
 import {
   setProductDiscountPrice,
@@ -17,6 +18,7 @@ import sendDataImage from '../../utils/sendDataImage';
 import updateProductData from '../../utils/updateProductData';
 
 const useProductForm = () => {
+  const history = useHistory();
   const dispatch = useDispatch();
   const { key: productKey, imageError, image, discountedPriceError } = useSelector(
     (state) => state.product
@@ -107,13 +109,13 @@ const useProductForm = () => {
       .required('Price is required')
       .min(0, 'Price should be more 0')
       .max(99999999.99, 'Price should be less 100 000 000'),
-    priceDate: yup.date('Enter date').when('price', {
-      is: true, // alternatively: (price) => !!price
-      then: yup.date().required('Product date is required'),
-      otherwise: yup.date(),
-    }),
+    discountedPrice: yup.number(),
+    discountedDate: yup
+      .date('Enter date')
+      .when('discountedPrice', (discountedPrice, schema) =>
+        discountedPrice ? schema.required('Product date is required') : schema
+      ),
   });
-
   const formik = useFormik({
     initialValues: {
       name: '',
@@ -133,6 +135,7 @@ const useProductForm = () => {
         return;
       }
 
+      // ~ If Edit product
       if (productKey) {
         // ~ If update image
         if (image.name) {
@@ -142,7 +145,7 @@ const useProductForm = () => {
           };
           updateProductData(productKey, productData);
           sendDataImage('products', image);
-          window.location.pathname = '/';
+          history.push('/');
         } else {
           // ~ If did not update image
           const productData = {
@@ -150,7 +153,7 @@ const useProductForm = () => {
             image,
           };
           updateProductData(productKey, productData);
-          window.location.pathname = '/';
+          history.push('/');
         }
       } else {
         // ~ Add product

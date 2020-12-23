@@ -124,13 +124,16 @@ const ProductForm = () => {
               value={formik.values.discountedPrice}
               onChange={formik.handleChange}
             >
-              <MenuItem value=""> </MenuItem>
+              <MenuItem value="">None</MenuItem>
               {optionsSelect.map((option) => (
                 <MenuItem value={option} key={option}>
                   {option}%
                 </MenuItem>
               ))}
             </Select>
+            <Typography component="h6" className={classes.imageError} variant="body2">
+              {formik.touched.discountedPrice && !!formik.errors.discountedPrice}
+            </Typography>
           </FormControl>
 
           <TextField
@@ -139,6 +142,7 @@ const ProductForm = () => {
             id="discountedDate"
             name="discountedDate"
             variant="outlined"
+            disabled={!formik.values.discountedPrice}
             value={formik.values.discountedDate}
             onChange={formik.handleChange}
             error={formik.touched.discountedDate && !!formik.errors.discountedDate}

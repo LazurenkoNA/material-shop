@@ -12,8 +12,8 @@ import { Box, Button } from '@material-ui/core';
 import { Link } from 'react-router-dom';
 import fire from '../../../utils/firebase';
 import { setProductKey } from '../../../store/actions/productActions';
-import setProducts from '../../../store/actions/productsActions';
-import deleteData from '../../../utils/deleteData';
+// import setProducts from '../../../store/actions/productsActions';
+// import deleteData from '../../../utils/deleteData';
 import useCardItem from './hook';
 
 const useStyles = makeStyles({
@@ -33,7 +33,7 @@ const useStyles = makeStyles({
   },
 });
 // eslint-disable-next-line react/prop-types
-const CardItem = ({ id }) => {
+const CardItem = ({ id, handleClickOpen }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const [image, setImage] = useState('');
@@ -54,16 +54,6 @@ const CardItem = ({ id }) => {
     setImage(pathReference);
 
     return pathReference;
-  };
-
-  const handleDeleteCard = () => {
-    // Delete in bd
-    deleteData('products', id);
-    // Delete in state
-    const newProducts = { ...products };
-
-    delete newProducts[id];
-    dispatch(setProducts({ ...newProducts }));
   };
 
   // Get image
@@ -117,7 +107,7 @@ const CardItem = ({ id }) => {
                   Edit
                 </Button>
               </Link>
-              <Button size="small" color="primary" onClick={handleDeleteCard}>
+              <Button size="small" color="primary" onClick={() => handleClickOpen(id)}>
                 Delete
               </Button>
             </Box>
