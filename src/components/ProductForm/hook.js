@@ -113,8 +113,9 @@ const useProductForm = () => {
     discountedDate: yup
       .date('Enter date')
       .when('discountedPrice', (discountedPrice, schema) =>
-        discountedPrice ? schema.required('Product date is required') : schema
-      ),
+        discountedPrice ? schema.required('Discount date is required') : schema
+      )
+      .min(new Date(), 'Discount date should not be in the past'),
   });
   const formik = useFormik({
     initialValues: {
