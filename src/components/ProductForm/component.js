@@ -1,5 +1,16 @@
 import React from 'react';
-import { Box, Button, Fab, Snackbar, TextField, Typography } from '@material-ui/core';
+import {
+  Box,
+  Button,
+  Fab,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  Snackbar,
+  TextField,
+  Typography,
+} from '@material-ui/core';
 import { useSelector } from 'react-redux';
 import { NavigateBefore } from '@material-ui/icons';
 import { Link } from 'react-router-dom';
@@ -7,33 +18,19 @@ import useProductForm from './hook';
 import Alert from '../Alert';
 
 const ProductForm = () => {
-  const {
-    key,
-    name,
-    nameError,
-    description,
-    descriptionError,
-    price,
-    priceError,
-    image,
-    discountedPrice,
-    discountedPriceError,
-    discountedDate,
-    discountedDateError,
-  } = useSelector((state) => state.product);
+  const { key, image, imageError } = useSelector((state) => state.product);
   const {
     openAlert,
     handleAlertClose,
     useStyles,
-    handleSendData,
-    handlerSetProductName,
-    handlerSetProductDescription,
-    handlerSetProductPrice,
-    handlerSetDiscountPrice,
-    handleSetImage,
-    handleSetProductDate,
+    // handleSendData,
+    formik,
+    handleLoadImage,
+    optionsSelect,
   } = useProductForm();
   const classes = useStyles();
+
+  // console.log(formik);
 
   return (
     <div className={classes.root}>
@@ -42,99 +39,135 @@ const ProductForm = () => {
           <NavigateBefore fontSize="large" />
         </Fab>
       </Link>
-
-      <Typography variant="h2" component="h1" className={classes.title}>
-        {key ? 'Edit Product' : 'Add Product'}
-      </Typography>
-      <Box>
-        <TextField
-          required
-          value={name}
-          autoFocus
-          fullWidth
-          multiline
-          className={classes.inputItem}
-          onChange={handlerSetProductName}
-          label="Name"
-          error={!!nameError}
-          helperText={nameError}
-          variant="outlined"
-        />
-        <TextField
-          className={classes.inputItem}
-          value={description}
-          multiline
-          fullWidth
-          onChange={handlerSetProductDescription}
-          label="Description"
-          error={!!descriptionError}
-          helperText={descriptionError}
-          variant="outlined"
-        />
-      </Box>
-      <Box>
-        <TextField
-          required
-          value={price}
-          className={classes.inputItem}
-          onInput={handlerSetProductPrice}
-          label="Price, $"
-          error={!!priceError}
-          helperText={priceError}
-          variant="outlined"
-        />
-      </Box>
-      <Box className={classes.file}>
-        <label htmlFor="button-file" className={classes.fileButton} onChange={handleSetImage}>
-          <input accept="image/*" className={classes.input} id="button-file" multiple type="file" />
-          <Button variant="contained" color="primary" component="span">
-            Upload
-          </Button>
-        </label>
-        <Typography component="h6" variant="h6">
-          {image ? image.name || image : 'Load File *'}
+      <form onSubmit={formik.handleSubmit}>
+        <Typography variant="h2" component="h1" className={classes.title}>
+          {key ? 'Edit Product' : 'Add Product'}
         </Typography>
-      </Box>
-      <Box>
-        <TextField
-          className={classes.inputItem}
-          label="Sale, %"
-          value={discountedPrice}
-          onChange={handlerSetDiscountPrice}
-          error={!!discountedPriceError}
-          helperText={discountedPriceError}
-          variant="outlined"
-        />
-        <TextField
-          id="date"
-          label="Discount time to:"
-          type="date"
-          variant="outlined"
-          value={discountedDate}
-          onChange={handleSetProductDate}
-          defaultValue={discountedDate}
-          error={!!discountedDateError}
-          helperText={discountedDateError}
-          className={classes.inputItem}
-          InputLabelProps={{
-            shrink: true,
-          }}
-        />
-      </Box>
+        <Box>
+          <TextField
+            required
+            value={formik.values.name}
+            autoFocus
+            fullWidth
+            multiline
+            id="name"
+            name="name"
+            className={classes.inputItem}
+            onChange={formik.handleChange}
+            label="Name"
+            error={formik.touched.name && !!formik.errors.name}
+            helperText={formik.touched.name && formik.errors.name}
+            variant="outlined"
+          />
+          <TextField
+            className={classes.inputItem}
+            value={formik.values.description}
+            multiline
+            fullWidth
+            id="description"
+            name="description"
+            onChange={formik.handleChange}
+            label="Description"
+            error={formik.touched.description && !!formik.errors.description}
+            helperText={formik.touched.description && formik.errors.description}
+            variant="outlined"
+          />
+        </Box>
+        <Box>
+          <TextField
+            required
+            value={formik.values.price}
+            type="number"
+            id="price"
+            name="price"
+            className={classes.inputItem}
+            onChange={formik.handleChange}
+            label="Price, $"
+            error={formik.touched.price && !!formik.errors.price}
+            helperText={formik.touched.price && formik.errors.price}
+            variant="outlined"
+          />
+        </Box>
+        <Box className={classes.file}>
+          <label htmlFor="button-file" className={classes.fileButton}>
+            <input
+              accept="image/*"
+              className={classes.input}
+              onChange={handleLoadImage}
+              id="button-file"
+              multiple
+              type="file"
+            />
+            <Button variant="contained" color="primary" component="span">
+              Upload
+            </Button>
+          </label>
+          <Typography component="h6" variant="h6">
+            {image ? image.name || image : 'Load File *'}
+          </Typography>
+        </Box>
+        {imageError && (
+          <Typography component="h6" className={classes.imageError} variant="body2">
+            {imageError}
+          </Typography>
+        )}
+        <Box>
+          <FormControl
+            variant="outlined"
+            error={formik.touched.discountedPrice && !!formik.errors.discountedPrice}
+            className={classes.formControl}
+          >
+            <InputLabel id="discountedPrice">Sale, %</InputLabel>
+            <Select
+              id="discountedPrice"
+              name="discountedPrice"
+              value={formik.values.discountedPrice}
+              onChange={formik.handleChange}
+            >
+              <MenuItem value="">None</MenuItem>
+              {optionsSelect.map((option) => (
+                <MenuItem value={option} key={option}>
+                  {option}%
+                </MenuItem>
+              ))}
+            </Select>
+            <Typography component="h6" className={classes.imageError} variant="body2">
+              {formik.touched.discountedPrice && !!formik.errors.discountedPrice}
+            </Typography>
+          </FormControl>
 
-      <Box className={classes.submitButton}>
-        {/* <Link to="/"> */}
-        <Button
-          type="button"
-          color="primary"
-          size="large"
-          variant="outlined"
-          onClick={handleSendData}
-        >
-          {key ? 'Update Data' : 'Add'}
-        </Button>
-        {/* </Link> */}
-      </Box>
+          <TextField
+            label="Discount time to:"
+            type="date"
+            id="discountedDate"
+            name="discountedDate"
+            variant="outlined"
+            disabled={!formik.values.discountedPrice}
+            value={formik.values.discountedDate}
+            onChange={formik.handleChange}
+            error={formik.touched.discountedDate && !!formik.errors.discountedDate}
+            helperText={formik.touched.discountedDate && formik.errors.discountedDate}
+            className={classes.inputItem}
+            InputLabelProps={{
+              shrink: true,
+            }}
+          />
+        </Box>
+
+        <Box className={classes.submitButton}>
+          {/* <Link to="/"> */}
+          <Button
+            type="submit"
+            color="primary"
+            size="large"
+            variant="outlined"
+            // onClick={handleSendData}
+          >
+            {key ? 'Update Data' : 'Add'}
+          </Button>
+          {/* </Link> */}
+        </Box>
+      </form>
       <Snackbar open={openAlert} autoHideDuration={6000} onClose={handleAlertClose}>
         <Alert onClose={handleAlertClose} severity="success">
           This is a success message!
